@@ -18,8 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentImageIndex = 0;
     const imageSources = Array.from(galleryImages).map(img => img.src);
+    let isTransitioning = false; // Debounce flag
 
     function showImage(index, direction = 0) { // direction: 0 for no slide, -1 for left, 1 for right
+        if (isTransitioning) return; // Prevent multiple calls during transition
+
         const previousImageIndex = currentImageIndex;
 
         if (index < 0) {
@@ -31,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (direction !== 0) { // Only apply slide effect if navigating
+            isTransitioning = true; // Set flag when transition starts
             // Determine initial position for the new image
             const initialTransform = direction === 1 ? 'translateX(100%)' : 'translateX(-100%)';
             lightboxImage.style.transition = 'none'; // Disable transition temporarily
@@ -48,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxImage.style.transition = 'transform 0.3s ease-out'; // Only transition transform
             lightboxImage.style.transform = 'translateX(0)';
             // lightboxImage.style.opacity = '1'; // Removed fade effect
+
+            setTimeout(() => {
+                isTransitioning = false; // Reset flag after transition
+            }, 300); // Match transition duration
         } else { // Initial open or no navigation
             lightboxImage.style.transition = 'none'; // No slide on initial open
             lightboxImage.src = imageSources[currentImageIndex];
@@ -73,10 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     prevButton.addEventListener('click', () => {
+        if (isTransitioning) return; // Prevent multiple calls during transition
         showImage(currentImageIndex - 1, -1);
     });
 
     nextButton.addEventListener('click', () => {
+        if (isTransitioning) return; // Prevent multiple calls during transition
         showImage(currentImageIndex + 1, 1);
     });
 
@@ -85,8 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Escape') {
                 lightbox.classList.remove('open');
             } else if (e.key === 'ArrowLeft') {
+                if (isTransitioning) return; // Prevent multiple calls during transition
                 showImage(currentImageIndex - 1, -1);
             } else if (e.key === 'ArrowRight') {
+                if (isTransitioning) return; // Prevent multiple calls during transition
                 showImage(currentImageIndex + 1, 1);
             }
         }
@@ -105,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     lightbox.addEventListener('touchend', () => {
+        if (isTransitioning) return; // Prevent multiple calls during transition
         if (touchStartX - touchEndX > 50) { // Swiped left
             showImage(currentImageIndex + 1, 1);
         } else if (touchEndX - touchStartX > 50) { // Swiped right
