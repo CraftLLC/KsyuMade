@@ -125,6 +125,33 @@ app.get('/api/images', async (c) => {
   }
 });
 
+app.get('/api/debug', async (c) => {
+  try {
+    const { blobs } = await list({
+      token: c.env.VERCEL_BLOB_TOKEN,
+    });
+
+    const orderBlob = await list({
+      token: c.env.VERCEL_BLOB_TOKEN,
+      prefix: 'gallery-order.json'
+    });
+
+    let order = null;
+    if (orderBlob.blobs.length > 0) {
+      const orderResponse = await fetch(orderBlob.blobs[0].url);
+      order = await orderResponse.json();
+    }
+
+    return c.json({
+      blobs,
+      orderBlob,
+      order
+    });
+  } catch (error) {
+    return handleError(error, c);
+  }
+});
+
 app.post('/api/login', async (c) => {
   try {
     const { login, password } = await c.req.json();
