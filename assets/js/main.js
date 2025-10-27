@@ -1,6 +1,15 @@
+function preloadImage(index, sources) {
+    if (index < 0 || index >= sources.length) {
+        return;
+    }
+    const img = new Image();
+    img.src = sources[index];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const animationWrapper = document.getElementById('animation-wrapper');
     const truck = document.getElementById('truck');
+    const galleryContainer = document.querySelector('.gallery');
 
     if (animationWrapper && truck) {
         truck.addEventListener('animationend', () => {
@@ -8,122 +17,131 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const galleryImages = document.querySelectorAll('.gallery-image');
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImage = document.getElementById('lightbox-image');
-    const closeButton = document.querySelector('.close-button');
-    const prevButton = document.querySelector('.prev-button');
-    const nextButton = document.querySelector('.next-button');
-    const imageCounter = document.querySelector('.image-counter');
+    async function initializeGallery() {
+        try {
+            const response = await fetch('/api/images');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch images: ${response.statusText}`);
+            }
+            const imageUrls = await response.json();
 
-    let currentImageIndex = 0;
-    const imageSources = Array.from(galleryImages).map(img => img.src);
-    let isTransitioning = false; // Debounce flag
+            if (!imageUrls || imageUrls.length === 0) {
+                galleryContainer.innerHTML = '<p>No images in the gallery yet.</p>';
+                return;
+            }
 
-    function showImage(index, direction = 0) { // direction: 0 for no slide, -1 for left, 1 for right
-        if (isTransitioning) return; // Prevent multiple calls during transition
+            galleryContainer.innerHTML = ''; // Clear static images
 
-        const previousImageIndex = currentImageIndex;
+            imageUrls.forEach((url, index) => {
+                const img = document.createElement('img');
+                img.className = 'gallery-image';
+                img.src = (index === 0) ? url : ''; // Load first image, rest are lazy
+                img.dataset.src = url;
+                img.alt = `Plaid ${index + 1}`;
+                if (index !== 0) {
+                    img.style.display = 'none'; // Hide non-first images as per original CSS
+                }
+                galleryContainer.appendChild(img);
+            });
 
-        if (index < 0) {
-            currentImageIndex = imageSources.length - 1;
-        } else if (index >= imageSources.length) {
-            currentImageIndex = 0;
-        } else {
-            currentImageIndex = index;
-        }
+            setupLightbox(imageUrls);
 
-        if (direction !== 0) { // Only apply slide effect if navigating
-            isTransitioning = true; // Set flag when transition starts
-            // Determine initial position for the new image
-            const initialTransform = direction === 1 ? 'translateX(100%)' : 'translateX(-100%)';
-            lightboxImage.style.transition = 'none'; // Disable transition temporarily
-            lightboxImage.style.transform = initialTransform;
-            // lightboxImage.style.opacity = '0'; // Removed fade effect
-
-            // Force reflow to apply the initial transform immediately
-            void lightboxImage.offsetWidth;
-
-            // Set the new image source
-            lightboxImage.src = imageSources[currentImageIndex];
-            imageCounter.textContent = `${currentImageIndex + 1} / ${imageSources.length}`;
-
-            // Re-enable transition and slide into view
-            lightboxImage.style.transition = 'transform 0.3s ease-out'; // Only transition transform
-            lightboxImage.style.transform = 'translateX(0)';
-            // lightboxImage.style.opacity = '1'; // Removed fade effect
-
-            setTimeout(() => {
-                isTransitioning = false; // Reset flag after transition
-            }, 300); // Match transition duration
-        } else { // Initial open or no navigation
-            lightboxImage.style.transition = 'none'; // No slide on initial open
-            lightboxImage.src = imageSources[currentImageIndex];
-            imageCounter.textContent = `${currentImageIndex + 1} / ${imageSources.length}`;
-            // Fade in effect for initial open is handled by the click listener
-            lightboxImage.style.transform = 'translateX(0)';
-            lightboxImage.style.opacity = '1';
+        } catch (error) {
+            console.error('Failed to initialize gallery:', error);
+            galleryContainer.innerHTML = '<p>Could not load gallery. Please try again later.</p>';
         }
     }
 
-    galleryImages.forEach((image, index) => {
-        image.addEventListener('click', () => {
-            lightbox.classList.add('open');
-            showImage(index);
-        });
-    });
+    function setupLightbox(imageSources) {
+        const galleryImages = document.querySelectorAll('.gallery-image');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const closeButton = document.querySelector('.close-button');
+        const prevButton = document.querySelector('.prev-button');
+        const nextButton = document.querySelector('.next-button');
+        const imageCounter = document.querySelector('.image-counter');
 
-    closeButton.addEventListener('click', () => {
-        lightbox.classList.remove('open');
-        // Reset image styles when closing lightbox
-        lightboxImage.style.transform = 'translateX(0)';
-        lightboxImage.style.opacity = '1';
-    });
+        if (!lightbox) return; // Exit if lightbox elements are not on the page
 
-    prevButton.addEventListener('click', () => {
-        if (isTransitioning) return; // Prevent multiple calls during transition
-        showImage(currentImageIndex - 1, -1);
-    });
+        let currentImageIndex = 0;
+        let isTransitioning = false;
 
-    nextButton.addEventListener('click', () => {
-        if (isTransitioning) return; // Prevent multiple calls during transition
-        showImage(currentImageIndex + 1, 1);
-    });
+        function showImage(index, direction = 0) {
+            if (isTransitioning) return;
 
-    document.addEventListener('keydown', (e) => {
-        if (lightbox.classList.contains('open')) {
-            if (e.key === 'Escape') {
-                lightbox.classList.remove('open');
-            } else if (e.key === 'ArrowLeft') {
-                if (isTransitioning) return; // Prevent multiple calls during transition
-                showImage(currentImageIndex - 1, -1);
-            } else if (e.key === 'ArrowRight') {
-                if (isTransitioning) return; // Prevent multiple calls during transition
-                showImage(currentImageIndex + 1, 1);
+            if (index < 0) {
+                currentImageIndex = imageSources.length - 1;
+            } else if (index >= imageSources.length) {
+                currentImageIndex = 0;
+            } else {
+                currentImageIndex = index;
+            }
+
+            const newSrc = imageSources[currentImageIndex];
+            if (!newSrc) return;
+
+            const displayImage = () => {
+                lightboxImage.src = newSrc;
+                imageCounter.textContent = `${currentImageIndex + 1} / ${imageSources.length}`;
+                preloadImage(currentImageIndex + 1, imageSources);
+                preloadImage(currentImageIndex - 1, imageSources);
+            };
+
+            if (direction !== 0) {
+                isTransitioning = true;
+                const initialTransform = direction === 1 ? 'translateX(100%)' : 'translateX(-100%)';
+                lightboxImage.style.transition = 'none';
+                lightboxImage.style.transform = initialTransform;
+
+                void lightboxImage.offsetWidth;
+
+                lightboxImage.style.transition = 'transform 0.3s ease-out';
+                lightboxImage.style.transform = 'translateX(0)';
+                displayImage();
+
+                setTimeout(() => { isTransitioning = false; }, 300);
+            } else {
+                displayImage();
             }
         }
-    });
 
-    // Swipe functionality
-    let touchStartX = 0;
-    let touchEndX = 0;
+        galleryImages.forEach((image, index) => {
+            image.addEventListener('click', () => {
+                lightbox.classList.add('open');
+                showImage(index);
+            });
+        });
 
-    lightbox.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-    });
+        closeButton.addEventListener('click', () => lightbox.classList.remove('open'));
+        prevButton.addEventListener('click', () => showImage(currentImageIndex - 1, -1));
+        nextButton.addEventListener('click', () => showImage(currentImageIndex + 1, 1));
 
-    lightbox.addEventListener('touchmove', (e) => {
-        touchEndX = e.touches[0].clientX;
-    });
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('open')) return;
+            if (e.key === 'Escape') lightbox.classList.remove('open');
+            if (e.key === 'ArrowLeft') showImage(currentImageIndex - 1, -1);
+            if (e.key === 'ArrowRight') showImage(currentImageIndex + 1, 1);
+        });
 
-    lightbox.addEventListener('touchend', () => {
-        if (isTransitioning) return; // Prevent multiple calls during transition
-        if (touchStartX - touchEndX > 50) { // Swiped left
-            showImage(currentImageIndex + 1, 1);
-        } else if (touchEndX - touchStartX > 50) { // Swiped right
-            showImage(currentImageIndex - 1, -1);
-        }
-        touchStartX = 0;
-        touchEndX = 0;
-    });
+        let touchStartX = 0;
+        lightbox.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+        lightbox.addEventListener('touchmove', (e) => {
+            if (touchStartX === 0) return;
+            const touchEndX = e.touches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                showImage(currentImageIndex + (diff > 0 ? 1 : -1), diff > 0 ? 1 : -1);
+                touchStartX = 0;
+            }
+        });
+    }
+
+    initializeGallery();
+
+    const copyrightYearEl = document.getElementById('copyright-year');
+    if (copyrightYearEl) {
+        const startYear = 2025;
+        const currentYear = new Date().getFullYear();
+        copyrightYearEl.textContent = (currentYear > startYear) ? `${startYear}–${currentYear}` : startYear;
+    }
 });

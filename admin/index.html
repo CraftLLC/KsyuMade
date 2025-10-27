@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - KsyuMade</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <form id="login-form">
+            <h1>KsyuMade Admin</h1>
+            <div class="input-group">
+                <label for="login">Логін</label>
+                <input type="text" id="login" name="login" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Увійти</button>
+            <p id="error-message" class="error-message"></p>
+        </form>
+    </div>
+    <script src="admin.js"></script>
+</body>
+</html>

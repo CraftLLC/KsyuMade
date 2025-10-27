@@ -29,11 +29,11 @@ KsyuMade/
     │   ├───favicon.ico
     │   ├───logo.png
     │   └───gallery/
-    │       ├───plaid1.jpg
-    │       ├───plaid2.jpg
-    │       ├───plaid3.jpg
-    │       ├───plaid4.jpg
-    │       └───plaid5.jpg
+    │       ├───1.jpg
+    │       ├───2.jpg
+    │       ├───3.jpg
+    │       ├───4.jpg
+    │       └───5.jpg
     └───js/
         └───main.js
 ```
