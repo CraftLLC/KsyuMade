@@ -101,16 +101,12 @@ app.get('/api/images', async (c) => {
       token: c.env.VERCEL_BLOB_TOKEN,
     });
 
-    const imageBlobs = blobs.filter(blob => !blob.pathname.startsWith('gallery-order.json'));
-
-    const orderBlob = await list({ 
-      token: c.env.VERCEL_BLOB_TOKEN,
-      prefix: 'gallery-order.json' 
-    });
+    const imageBlobs = blobs.filter(blob => blob.pathname !== 'gallery-order.json');
+    const orderBlob = blobs.find(blob => blob.pathname === 'gallery-order.json');
 
     let orderedUrls = [];
-    if (orderBlob.blobs.length > 0) {
-      const orderResponse = await fetch(orderBlob.blobs[0].url);
+    if (orderBlob) {
+      const orderResponse = await fetch(orderBlob.url);
       const order = await orderResponse.json();
       orderedUrls = order.map(filename => imageBlobs.find(b => b.pathname === filename)?.url).filter(Boolean);
       const unorderedUrls = imageBlobs.filter(b => !order.includes(b.pathname)).map(b => b.url);
@@ -131,14 +127,11 @@ app.get('/api/debug', async (c) => {
       token: c.env.VERCEL_BLOB_TOKEN,
     });
 
-    const orderBlob = await list({
-      token: c.env.VERCEL_BLOB_TOKEN,
-      prefix: 'gallery-order.json'
-    });
+    const orderBlob = blobs.find(blob => blob.pathname === 'gallery-order.json');
 
     let order = null;
-    if (orderBlob.blobs.length > 0) {
-      const orderResponse = await fetch(orderBlob.blobs[0].url);
+    if (orderBlob) {
+      const orderResponse = await fetch(orderBlob.url);
       order = await orderResponse.json();
     }
 
