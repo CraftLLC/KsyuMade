@@ -26,6 +26,14 @@ adminApp.post('/images', async (c) => {
       return c.json({ error: 'No file uploaded' }, 400);
     }
 
+    if (!file.type.startsWith('image/')) {
+      return c.json({ error: 'Only images are allowed.' }, 400);
+    }
+
+    if (file.name === 'gallery-order.json') {
+      return c.json({ error: 'This filename is not allowed.' }, 400);
+    }
+
     const { url } = await put(file.name, file, {
       access: 'public',
       token: c.env.VERCEL_BLOB_TOKEN,
@@ -53,6 +61,15 @@ adminApp.post('/images/order', async (c) => {
   try {
     const { order } = await c.req.json();
 
+    const pathnames = order.map(url => {
+      try {
+        const urlObject = new URL(url);
+        return urlObject.pathname.substring(1);
+      } catch (e) {
+        return null;
+      }
+    }).filter(Boolean);
+
     const { blobs } = await list({
       prefix: 'gallery-order.json',
       token: c.env.VERCEL_BLOB_TOKEN,
@@ -60,7 +77,7 @@ adminApp.post('/images/order', async (c) => {
 
     await Promise.all(blobs.map(blob => del(blob.url, { token: c.env.VERCEL_BLOB_TOKEN })));
 
-    await put('gallery-order.json', JSON.stringify(order), {
+    await put('gallery-order.json', JSON.stringify(pathnames), {
       access: 'public',
       token: c.env.VERCEL_BLOB_TOKEN,
     });
