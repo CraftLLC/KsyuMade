@@ -3,13 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - KsyuMade</title>
+    <title>Панель адміністратора - KsyuMade</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="admin-panel" class="hidden">
+        <header>
+            <h1>Панель адміністратора</h1>
+            <button id="logout-button">Вийти</button>
+        </header>
+        <main>
+            <section id="gallery-management">
+                <h2>Керування галереєю</h2>
+                <div id="gallery-container"></div>
+                <form id="upload-form">
+                    <input type="file" id="file-input" name="file" accept="image/*">
+                    <button type="submit">Завантажити зображення</button>
+                </form>
+            </section>
+            <button id="save-order-button">Зберегти порядок</button>
+        </main>
+    </div>
     <div class="login-container">
         <form id="login-form">
-            <h1>KsyuMade Admin</h1>
+            <h1>KsyuMade Адмін</h1>
             <div class="input-group">
                 <label for="login">Логін</label>
                 <input type="text" id="login" name="login" required>
@@ -22,6 +39,7 @@
             <p id="error-message" class="error-message"></p>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

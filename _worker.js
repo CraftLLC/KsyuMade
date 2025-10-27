@@ -1,14 +1,70 @@
 import { Hono } from 'hono';
-import { list } from '@vercel/blob';
+import { list, put, del } from '@vercel/blob';
 import { SignJWT } from 'jose';
+import { jwt } from 'hono/jwt';
 
 const app = new Hono().basePath('/');
+const adminApp = new Hono();
 
 const handleError = (error, c) => {
   console.error('An error occurred:', error.message);
   return c.json({ error: 'Internal Server Error', details: error.message }, 500);
 };
 
+// Protected admin routes
+adminApp.use('*', async (c, next) => {
+  const jwtMiddleware = jwt({
+    secret: c.env.JWT_SECRET,
+  });
+  return jwtMiddleware(c, next);
+});
+
+adminApp.post('/images', async (c) => {
+  try {
+    const { file } = await c.req.parseBody();
+    if (!file) {
+      return c.json({ error: 'No file uploaded' }, 400);
+    }
+
+    const { url } = await put(file.name, file, {
+      access: 'public',
+      token: c.env.VERCEL_BLOB_TOKEN,
+    });
+
+    return c.json({ url });
+  } catch (error) {
+    return handleError(error, c);
+  }
+});
+
+adminApp.delete('/images/:filename', async (c) => {
+  try {
+    const { filename } = c.req.param();
+    await del(`${filename}`, {
+      token: c.env.VERCEL_BLOB_TOKEN,
+    });
+    return c.json({ success: true });
+  } catch (error) {
+    return handleError(error, c);
+  }
+});
+
+adminApp.post('/images/order', async (c) => {
+  try {
+    const { order } = await c.req.json();
+    await put('gallery-order.json', JSON.stringify(order), {
+      access: 'public',
+      token: c.env.VERCEL_BLOB_TOKEN,
+    });
+    return c.json({ success: true });
+  } catch (error) {
+    return handleError(error, c);
+  }
+});
+
+app.route('/api/admin', adminApp);
+
+// Public routes
 app.get('/api/images', async (c) => {
   try {
     if (!c.env.VERCEL_BLOB_TOKEN) {
@@ -19,15 +75,23 @@ app.get('/api/images', async (c) => {
       token: c.env.VERCEL_BLOB_TOKEN,
     });
 
-    const sortedBlobs = blobs.sort((a, b) => {
-      const numA = parseInt(a.pathname.match(/^(\d+)/)?.[1] || '0', 10);
-      const numB = parseInt(b.pathname.match(/^(\d+)/)?.[1] || '0', 10);
-      return numA - numB;
+    const orderBlob = await list({ 
+      token: c.env.VERCEL_BLOB_TOKEN,
+      prefix: 'gallery-order.json' 
     });
 
-    const urls = sortedBlobs.map(blob => blob.url);
+    let orderedUrls = [];
+    if (orderBlob.blobs.length > 0) {
+      const orderResponse = await fetch(orderBlob.blobs[0].url);
+      const order = await orderResponse.json();
+      orderedUrls = order.map(filename => blobs.find(b => b.pathname === filename)?.url).filter(Boolean);
+      const unorderedUrls = blobs.filter(b => !order.includes(b.pathname)).map(b => b.url);
+      orderedUrls.push(...unorderedUrls);
+    } else {
+      orderedUrls = blobs.map(b => b.url);
+    }
 
-    return c.json(urls);
+    return c.json(orderedUrls);
   } catch (error) {
     return handleError(error, c);
   }
