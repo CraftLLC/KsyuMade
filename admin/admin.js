@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
     const galleryContainer = document.getElementById('gallery-container');
     const uploadForm = document.getElementById('upload-form');
-    const saveOrderButton = document.getElementById('save-order-button');
 
     const token = localStorage.getItem('ksyumade_jwt');
 
