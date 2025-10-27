@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
     const galleryContainer = document.getElementById('gallery-container');
     const uploadForm = document.getElementById('upload-form');
+    const saveOrderButton = document.getElementById('save-order-button');
 
     const token = localStorage.getItem('ksyumade_jwt');
 
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Помилка автентифікації');
+                    throw new Error(errorData.error || 'ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ° Ð°Ð²Ñ‚ÐµÐ½Ñ‚Ð¸Ñ„Ñ–ÐºÐ°Ñ†Ñ–Ñ—');
                 }
 
                 const { token } = await response.json();
@@ -149,33 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Upload failed:', error);
                 alert('Upload failed.');
-            }
-        });
-    }
-
-    if (saveOrderButton) {
-        saveOrderButton.addEventListener('click', async () => {
-            const order = [...galleryContainer.children].map(item => item.querySelector('img').src);
-
-            try {
-                const response = await fetch('/api/admin/images/order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ order })
-                });
-
-                if (response.ok) {
-                    alert('Order saved successfully!');
-                } else {
-                    const errorData = await response.json();
-                    alert(`Failed to save order: ${errorData.error}`);
-                }
-            } catch (error) {
-                console.error('Failed to save order:', error);
-                alert('Failed to save order.');
             }
         });
     }
