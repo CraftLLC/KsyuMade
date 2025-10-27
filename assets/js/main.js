@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageUrls = await response.json();
 
             if (!imageUrls || imageUrls.length === 0) {
-                galleryContainer.innerHTML = '<p>No images in the gallery yet.</p>';
+                galleryContainer.innerHTML = '<p>Наразі в галереї немає зображень.</p>';
                 return;
             }
 
