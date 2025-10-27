@@ -52,10 +52,19 @@ adminApp.delete('/images/:filename', async (c) => {
 adminApp.post('/images/order', async (c) => {
   try {
     const { order } = await c.req.json();
+
+    const { blobs } = await list({
+      prefix: 'gallery-order.json',
+      token: c.env.VERCEL_BLOB_TOKEN,
+    });
+
+    await Promise.all(blobs.map(blob => del(blob.url, { token: c.env.VERCEL_BLOB_TOKEN })));
+
     await put('gallery-order.json', JSON.stringify(order), {
       access: 'public',
       token: c.env.VERCEL_BLOB_TOKEN,
     });
+
     return c.json({ success: true });
   } catch (error) {
     return handleError(error, c);
@@ -75,7 +84,7 @@ app.get('/api/images', async (c) => {
       token: c.env.VERCEL_BLOB_TOKEN,
     });
 
-    const imageBlobs = blobs.filter(blob => blob.pathname !== 'gallery-order.json');
+    const imageBlobs = blobs.filter(blob => !blob.pathname.startsWith('gallery-order.json'));
 
     const orderBlob = await list({ 
       token: c.env.VERCEL_BLOB_TOKEN,
