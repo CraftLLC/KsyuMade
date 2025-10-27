@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (saveOrderButton) {
         saveOrderButton.addEventListener('click', async () => {
-            const order = [...galleryContainer.children].map(item => item.getAttribute('data-filename'));
+            const order = [...galleryContainer.children].map(item => item.querySelector('img').src);
 
             try {
                 const response = await fetch('/api/admin/images/order', {
