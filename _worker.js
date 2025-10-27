@@ -1,6 +1,6 @@
-import { Hono } from 'https://esm.sh/hono@4.2.7';
-import { list } from 'https://esm.sh/@vercel/blob@0.23.2';
-import { SignJWT } from 'https://esm.sh/jose@5.3.0';
+import { Hono } from 'hono';
+import { list } from '@vercel/blob';
+import { SignJWT } from 'jose';
 
 // The Hono app is exported by default. Cloudflare Pages will use it to handle requests.
 const app = new Hono().basePath('/');
