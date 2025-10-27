@@ -2,21 +2,13 @@ import { Hono } from 'hono';
 import { list } from '@vercel/blob';
 import { SignJWT } from 'jose';
 
-// The Hono app is exported by default. Cloudflare Pages will use it to handle requests.
 const app = new Hono().basePath('/');
 
-/**
- * Handles errors gracefully and returns a JSON response.
- * @param {Error} error - The error object.
- * @param {import('hono').Context} c - The Hono context.
- * @returns {Response}
- */
 const handleError = (error, c) => {
   console.error('An error occurred:', error.message);
   return c.json({ error: 'Internal Server Error', details: error.message }, 500);
 };
 
-// Public endpoint to get all gallery images, sorted numerically
 app.get('/api/images', async (c) => {
   try {
     if (!c.env.VERCEL_BLOB_TOKEN) {
@@ -27,7 +19,6 @@ app.get('/api/images', async (c) => {
       token: c.env.VERCEL_BLOB_TOKEN,
     });
 
-    // Sort blobs numerically based on their pathname (e.g., 1.jpg, 2.jpg, 10.jpg)
     const sortedBlobs = blobs.sort((a, b) => {
       const numA = parseInt(a.pathname.match(/^(\d+)/)?.[1] || '0', 10);
       const numB = parseInt(b.pathname.match(/^(\d+)/)?.[1] || '0', 10);
@@ -42,17 +33,14 @@ app.get('/api/images', async (c) => {
   }
 });
 
-// Login endpoint
 app.post('/api/login', async (c) => {
   try {
     const { login, password } = await c.req.json();
 
-    // Verify credentials against environment variables (secrets)
     if (login !== c.env.ADMIN_LOGIN || password !== c.env.ADMIN_PASSWORD) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
 
-    // Create a JWT
     const secret = new TextEncoder().encode(c.env.JWT_SECRET);
     const alg = 'HS256';
 
@@ -61,7 +49,7 @@ app.post('/api/login', async (c) => {
       .setIssuedAt()
       .setIssuer('urn:ksyumade:issuer')
       .setAudience('urn:ksyumade:audience')
-      .setExpirationTime('24h') // Token expires in 24 hours
+      .setExpirationTime('24h')
       .sign(secret);
 
     return c.json({ token: jwt });
@@ -71,4 +59,12 @@ app.post('/api/login', async (c) => {
   }
 });
 
-export default app;
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname.startsWith('/api/')) {
+      return app.fetch(request, env, ctx);
+    }
+    return env.ASSETS.fetch(request);
+  },
+};
