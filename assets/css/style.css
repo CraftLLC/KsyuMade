@@ -267,16 +267,6 @@ button#order-button i {
     letter-spacing: 1px;
 }
 
-/* Animation Wrapper */
-#animation-wrapper {
-    background: #000;
-}
-
-#truck path {
-    fill: var(--accent-gold);
-    filter: drop-shadow(0 0 10px var(--accent-gold));
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     h1 {

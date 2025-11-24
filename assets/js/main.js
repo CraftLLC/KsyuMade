@@ -7,15 +7,7 @@ function preloadImage(index, sources) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const animationWrapper = document.getElementById('animation-wrapper');
-    const truck = document.getElementById('truck');
     const galleryContainer = document.querySelector('.gallery');
-
-    if (animationWrapper && truck) {
-        truck.addEventListener('animationend', () => {
-            animationWrapper.style.display = 'none';
-        });
-    }
 
     async function initializeGallery() {
         try {
