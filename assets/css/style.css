@@ -29,19 +29,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    /* Center all direct children */
-}
-
-/* ... (existing styles) ... */
-
-h2 {
-    font-size: 2rem;
-    color: var(--text-color);
-    position: relative;
-    display: inline-block;
-    margin-bottom: 40px;
-    text-align: center;
 }
 
 /* Dynamic Background */
@@ -109,10 +96,13 @@ a {
     min-height: 80vh;
 <<<<<<< HEAD
     min-height: 80dvh;
+<<<<<<< HEAD
     width: 100%;
     /* Ensure full width */
 =======
 >>>>>>> parent of 55a4738 (Тестуємо божевільний дизайн.)
+=======
+>>>>>>> parent of 33b65a3 (Тестуємо божевільний дизайн.)
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -131,6 +121,7 @@ a {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Button Styling */
 button#order-button {
     /* ... existing styles ... */
@@ -138,6 +129,8 @@ button#order-button {
     /* Adjusted margin since it's now inside flex container */
 }
 
+=======
+>>>>>>> parent of 33b65a3 (Тестуємо божевільний дизайн.)
 /* ... (existing styles) ... */
 =======
 @keyframes float {
@@ -208,8 +201,6 @@ button#order-button i {
     gap: 20px;
     padding: 20px 5%;
     max-width: 1400px;
-    width: 100%;
-    /* Ensure full width */
     margin: 0 auto;
 }
 
