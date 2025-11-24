@@ -31,6 +31,19 @@ body {
     /* Better mobile support */
     display: flex;
     flex-direction: column;
+    align-items: center;
+    /* Center all direct children */
+}
+
+/* ... (existing styles) ... */
+
+h2 {
+    font-size: 2rem;
+    color: var(--text-color);
+    position: relative;
+    display: inline-block;
+    margin-bottom: 40px;
+    text-align: center;
 }
 
 /* ... (existing styles) ... */
@@ -39,6 +52,8 @@ body {
 .header-content {
     min-height: 80vh;
     min-height: 80dvh;
+    width: 100%;
+    /* Ensure full width */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -58,6 +73,13 @@ body {
     animation: float 6s ease-in-out infinite;
 }
 
+/* Button Styling */
+button#order-button {
+    /* ... existing styles ... */
+    margin-top: 30px;
+    /* Adjusted margin since it's now inside flex container */
+}
+
 /* ... (existing styles) ... */
 
 /* Gallery Grid */
@@ -68,6 +90,8 @@ body {
     gap: 20px;
     padding: 20px 5%;
     max-width: 1400px;
+    width: 100%;
+    /* Ensure full width */
     margin: 0 auto;
 }
 
