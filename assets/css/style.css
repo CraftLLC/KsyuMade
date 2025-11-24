@@ -200,60 +200,24 @@ button#order-button i {
     border-color: var(--accent-secondary);
 }
 
-/* Lightbox */
-.lightbox {
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
-}
-
-.lightbox-content {
-    max-width: 90vw;
-    max-height: 85vh;
-    border-radius: 8px;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-    border: 1px solid var(--glass-border);
-}
-
-.close-button {
-    top: 30px;
-    right: 40px;
-    color: var(--accent-primary);
-    text-shadow: 0 0 10px var(--accent-primary);
-    transition: transform 0.3s ease;
-}
-
-.close-button:hover {
-    transform: rotate(90deg);
-}
-
-.prev-button,
-.next-button {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.prev-button:hover,
-.next-button:hover {
-    background: var(--accent-primary);
-    color: #000;
-    transform: scale(1.1);
-}
-
 /* Footer */
 .footer {
     margin-top: auto;
     background: linear-gradient(to top, #000, transparent);
     padding: 60px 0 30px;
     border-top: 1px solid var(--glass-border);
+    text-align: center;
+    width: 100%;
 }
 
-.footer .social a {
+.social-links {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-icon {
     width: 50px;
     height: 50px;
     line-height: 48px;
@@ -262,13 +226,39 @@ button#order-button i {
     color: var(--text-color);
     background: var(--glass-bg);
     transition: all 0.3s ease;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
 }
 
-.footer .social a:hover {
+.social-icon:hover {
     border-color: var(--instagram-color);
     background: var(--instagram-color);
     box-shadow: 0 0 20px var(--instagram-color);
     transform: translateY(-5px);
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 10px;
+}
+
+.social-icon:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
 }
 
 .footer .copyright {
