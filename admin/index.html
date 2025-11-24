@@ -1,44 +1,144 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель адміністратора - KsyuMade</title>
+    <!-- Додаємо шрифти як на головній сторінці -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="admin-panel" class="hidden">
-        <header>
-            <h1>Панель адміністратора</h1>
-            <button id="logout-button">Вийти</button>
+        <div class="admin-logo">
+            <img src="../assets/images/logo.png" alt="KsyuMade Logo">
+        </div>
+
+        <header class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-crown"></i> Панель адміністратора</h1>
+                <p class="subtitle">KsyuMade Dashboard</p>
+            </div>
+            <button id="logout-button" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Вийти
+            </button>
         </header>
         <main>
             <section id="gallery-management">
-                <h2>Керування галереєю</h2>
-                <div id="gallery-container"></div>
-                <form id="upload-form">
-                    <input type="file" id="file-input" name="file" accept="image/*">
-                    <button type="submit">Завантажити зображення</button>
-                </form>
+                <h2><i class="fas fa-images"></i> Керування галереєю</h2>
+
+                <div class="upload-section">
+                    <form id="upload-form">
+                        <div class="upload-area">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Завантажити нове зображення</p>
+                            <input type="file" id="file-input" name="file" accept="image/*">
+                            <label for="file-input" class="file-label">
+                                <i class="fas fa-folder-open"></i> Обрати файл
+                            </label>
+                        </div>
+                        <button type="submit" class="upload-btn">
+                            <i class="fas fa-upload"></i> Завантажити
+                        </button>
+                    </form>
+                </div>
+
+                <div class="gallery-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-image"></i>
+                        <div>
+                            <span class="stat-number" id="total-images">0</span>
+                            <span class="stat-label">Зображень</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gallery-container" class="admin-gallery"></div>
             </section>
         </main>
+
+        <section class="footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <h3>Посилання</h3>
+                    <ul>
+                        <li><a href="/"><i class="fas fa-home"></i> KsyuMade</a></li>
+                    </ul>
+                </div>
+
+                <div class="social-links">
+                    <h3>Соціальні мережі</h3>
+                    <a href="https://instagram.com/ksyu_made" target="_blank" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                        <span class="tooltip">Instagram</span>
+                    </a>
+                </div>
+            </div>
+
+            <p class="copyright">© KsyuMade <span id="copyright-year">2025</span></p>
+        </section>
     </div>
+
     <div class="login-container">
-        <form id="login-form">
-            <h1>KsyuMade Адмін</h1>
-            <div class="input-group">
-                <label for="login">Логін</label>
-                <input type="text" id="login" name="login" required>
+        <div class="login-logo">
+            <img src="../assets/images/logo.png" alt="KsyuMade Logo">
+        </div>
+
+        <form id="login-form" class="login-form">
+            <div class="login-header">
+                <i class="fas fa-lock"></i>
+                <h1>KsyuMade</h1>
+                <p class="login-subtitle">Адміністративна панель</p>
             </div>
             <div class="input-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
+                <label for="login">
+                    <i class="fas fa-user"></i> Логін
+                </label>
+                <input type="text" id="login" name="login" required placeholder="Введіть логін">
             </div>
-            <button type="submit">Увійти</button>
+            <div class="input-group">
+                <label for="password">
+                    <i class="fas fa-key"></i> Пароль
+                </label>
+                <input type="password" id="password" name="password" required placeholder="Введіть пароль">
+            </div>
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Увійти
+            </button>
             <p id="error-message" class="error-message"></p>
         </form>
     </div>
+
+    <section class="footer footer-login">
+        <div class="footer-content">
+            <div class="footer-links">
+                <h3>Посилання</h3>
+                <ul>
+                    <li><a href="/"><i class="fas fa-home"></i> KsyuMade</a></li>
+                </ul>
+            </div>
+            
+            <div class="social-links">
+                <h3>Соціальні мережі</h3>
+                <a href="https://instagram.com/ksyu_made" target="_blank" class="social-icon">
+                    <i class="fab fa-instagram"></i>
+                    <span class="tooltip">Instagram</span>
+                </a>
+            </div>
+        </div>
+
+        <p class="copyright">© KsyuMade <span id="copyright-year-login">2025</span></p>
+    </section>
+
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="admin.js"></script>
 </body>
+
 </html>

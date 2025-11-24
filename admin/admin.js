@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
     const galleryContainer = document.getElementById('gallery-container');
     const uploadForm = document.getElementById('upload-form');
-    const saveOrderButton = document.getElementById('save-order-button');
+    const fileInput = document.getElementById('file-input');
+    const totalImagesEl = document.getElementById('total-images');
 
     const token = localStorage.getItem('ksyumade_jwt');
 
@@ -19,14 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
         loginContainer.classList.remove('hidden');
     }
 
-    if(logoutButton) {
+    // Logout handler
+    if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('ksyumade_jwt');
             window.location.reload();
         });
     }
 
-    if(loginForm) {
+    // Login form handler
+    if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             errorMessage.textContent = '';
@@ -45,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'ÐŸÐ¾Ð¼Ð¸Ð»ÐºÐ° Ð°Ð²Ñ‚ÐµÐ½Ñ‚Ð¸Ñ„Ñ–ÐºÐ°Ñ†Ñ–Ñ—');
+                    throw new Error(errorData.error || 'Помилка аутентифікації');
                 }
 
                 const { token } = await response.json();
@@ -60,6 +63,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Update file input label
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const fileName = e.target.files[0]?.name;
+            const label = document.querySelector('.file-label');
+            if (fileName) {
+                label.innerHTML = `<i class="fas fa-check"></i> ${fileName}`;
+            }
+        });
+    }
+
+    // Create progress bar
+    function createProgressBar() {
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'loading-progress';
+        progressContainer.innerHTML = `
+            <div class="progress-bar" id="progress-bar"></div>
+        `;
+        document.body.appendChild(progressContainer);
+
+        return {
+            progressBar: document.getElementById('progress-bar'),
+            container: progressContainer
+        };
+    }
+
+    // Update progress
+    function updateProgress(progressElements, current, total) {
+        const percentage = Math.round((current / total) * 100);
+        progressElements.progressBar.style.width = `${percentage}%`;
+
+        // Remove progress bar when complete
+        if (current === total) {
+            setTimeout(() => {
+                progressElements.container.style.opacity = '0';
+                setTimeout(() => {
+                    progressElements.container.remove();
+                }, 300);
+            }, 500);
+        }
+    }
+
+    // Load gallery with skeleton loaders
     async function loadGallery() {
         try {
             const response = await fetch('/api/images');
@@ -67,20 +113,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
             galleryContainer.innerHTML = '';
 
+            // Update stats
+            if (totalImagesEl) {
+                totalImagesEl.textContent = images.length;
+            }
+
+            if (images.length === 0) {
+                galleryContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Галерея порожня. Завантажте перше зображення!</p>';
+                return;
+            }
+
+            let loadedCount = 0;
+            const progressElements = createProgressBar();
+
             images.forEach(imageUrl => {
                 const imgContainer = document.createElement('div');
                 imgContainer.classList.add('gallery-item');
                 imgContainer.setAttribute('data-filename', imageUrl.split('/').pop());
 
+                // Create skeleton loader
+                const skeleton = document.createElement('div');
+                skeleton.className = 'skeleton-loader';
+                skeleton.textContent = 'Завантаження...';
+                imgContainer.appendChild(skeleton);
+
+                // Create image
                 const img = document.createElement('img');
+                img.dataset.src = imageUrl;
+                img.alt = 'Gallery image';
+
+                // Image load handler
+                img.onload = () => {
+                    loadedCount++;
+                    updateProgress(progressElements, loadedCount, images.length);
+                    skeleton.remove();
+                };
+
+                // Image error handler
+                img.onerror = () => {
+                    loadedCount++;
+                    updateProgress(progressElements, loadedCount, images.length);
+                    skeleton.textContent = '❌';
+                };
+
                 img.src = imageUrl;
 
+                // Create delete button
                 const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                 deleteButton.classList.add('delete-button');
                 deleteButton.addEventListener('click', async () => {
                     const filename = imageUrl.split('/').pop();
-                    if (confirm(`Are you sure you want to delete ${filename}?`)) {
+                    if (confirm(`Ви впевнені, що хочете видалити ${filename}?`)) {
                         try {
                             const deleteResponse = await fetch(`/api/admin/images/${filename}`, {
                                 method: 'DELETE',
@@ -90,14 +174,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
 
                             if (deleteResponse.ok) {
-                                loadGallery();
+                                // Animate removal
+                                imgContainer.style.opacity = '0';
+                                imgContainer.style.transform = 'scale(0.8)';
+                                setTimeout(() => {
+                                    loadGallery();
+                                }, 300);
                             } else {
                                 const errorData = await deleteResponse.json();
-                                alert(`Failed to delete image: ${errorData.error}`);
+                                alert(`Помилка видалення: ${errorData.error}`);
                             }
                         } catch (error) {
                             console.error('Delete failed:', error);
-                            alert('Failed to delete image.');
+                            alert('Помилка видалення зображення.');
                         }
                     }
                 });
@@ -107,30 +196,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 galleryContainer.appendChild(imgContainer);
             });
 
+            // Initialize drag and drop sorting
             new Sortable(galleryContainer, {
                 animation: 150,
-                ghostClass: 'sortable-ghost'
+                ghostClass: 'sortable-ghost',
+                onEnd: () => {
+                    // Optional: Save new order to server
+                    console.log('Gallery order changed');
+                }
             });
 
         } catch (error) {
             console.error('Failed to load gallery:', error);
-            galleryContainer.innerHTML = '<p>Failed to load gallery.</p>';
+            galleryContainer.innerHTML = '<p style="text-align: center; color: var(--error-color); padding: 40px;">Помилка завантаження галереї.</p>';
         }
     }
 
+    // Upload form handler
     if (uploadForm) {
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const fileInput = document.getElementById('file-input');
             const file = fileInput.files[0];
 
             if (!file) {
-                alert('Please select a file to upload.');
+                alert('Будь ласка, оберіть файл для завантаження.');
                 return;
             }
 
             const formData = new FormData();
             formData.append('file', file);
+
+            const uploadBtn = uploadForm.querySelector('.upload-btn');
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Завантаження...';
+            uploadBtn.disabled = true;
 
             try {
                 const response = await fetch('/api/admin/images', {
@@ -142,15 +241,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
+                    // Reset form
+                    uploadForm.reset();
+                    const label = document.querySelector('.file-label');
+                    label.innerHTML = '<i class="fas fa-folder-open"></i> Обрати файл';
+
+                    // Reload gallery
                     loadGallery();
+
+                    // Show success message
+                    uploadBtn.innerHTML = '<i class="fas fa-check"></i> Успіх!';
+                    setTimeout(() => {
+                        uploadBtn.innerHTML = originalText;
+                    }, 2000);
                 } else {
                     const errorData = await response.json();
-                    alert(`Upload failed: ${errorData.error}`);
+                    alert(`Помилка завантаження: ${errorData.error}`);
+                    uploadBtn.innerHTML = originalText;
                 }
             } catch (error) {
                 console.error('Upload failed:', error);
-                alert('Upload failed.');
+                alert('Помилка завантаження.');
+                uploadBtn.innerHTML = originalText;
+            } finally {
+                uploadBtn.disabled = false;
             }
         });
+    }
+
+    // Update copyright year for both footers
+    const copyrightYearEl = document.getElementById('copyright-year');
+    const copyrightYearLoginEl = document.getElementById('copyright-year-login');
+    const startYear = 2025;
+    const currentYear = new Date().getFullYear();
+    const yearText = (currentYear > startYear) ? `${startYear}–${currentYear}` : startYear;
+
+    if (copyrightYearEl) {
+        copyrightYearEl.textContent = yearText;
+    }
+    if (copyrightYearLoginEl) {
+        copyrightYearLoginEl.textContent = yearText;
     }
 });
