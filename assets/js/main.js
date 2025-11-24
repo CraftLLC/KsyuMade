@@ -35,12 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
             imageUrls.forEach((url, index) => {
                 const img = document.createElement('img');
                 img.className = 'gallery-image';
-                img.src = (index === 0) ? url : ''; // Load first image, rest are lazy
+                img.src = url; // Load all images for the grid layout
                 img.dataset.src = url;
                 img.alt = `Plaid ${index + 1}`;
-                if (index !== 0) {
-                    img.style.display = 'none'; // Hide non-first images as per original CSS
-                }
+                // Removed the hiding logic to support the grid layout
                 galleryContainer.appendChild(img);
             });
 
