@@ -13,6 +13,76 @@
     --glow-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
     --font-heading: 'Orbitron', sans-serif;
     --font-body: 'Outfit', sans-serif;
+    --vh: 1vh;
+    /* Динамічна висота*/
+}
+
+/* Progress Bar Container */
+.loading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--surface-color);
+    z-index: 9999;
+    overflow: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--accent-primary);
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.loading-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+    text-shadow: 0 0 20px var(--accent-primary);
+    z-index: 9998;
+    text-align: center;
+    transition: opacity 0.3s ease;
+}
+
+.loading-percentage {
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 10px;
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
 }
 
 * {
@@ -61,7 +131,6 @@ h1 {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
 }
 
 h2 {
@@ -93,16 +162,8 @@ a {
 
 /* Header Section */
 .header-content {
-    min-height: 80vh;
-<<<<<<< HEAD
     min-height: 80dvh;
-<<<<<<< HEAD
     width: 100%;
-    /* Ensure full width */
-=======
->>>>>>> parent of 55a4738 (Тестуємо божевільний дизайн.)
-=======
->>>>>>> parent of 33b65a3 (Тестуємо божевільний дизайн.)
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -120,19 +181,6 @@ a {
     animation: float 6s ease-in-out infinite;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-/* Button Styling */
-button#order-button {
-    /* ... existing styles ... */
-    margin-top: 30px;
-    /* Adjusted margin since it's now inside flex container */
-}
-
-=======
->>>>>>> parent of 33b65a3 (Тестуємо божевільний дизайн.)
-/* ... (existing styles) ... */
-=======
 @keyframes float {
 
     0%,
@@ -192,35 +240,104 @@ button#order-button:hover::before {
 button#order-button i {
     margin-left: 10px;
 }
->>>>>>> parent of 55a4738 (Тестуємо божевільний дизайн.)
 
 /* Gallery Grid */
 .gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px 5%;
-    max-width: 1400px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 40px;
+    max-width: 1200px;
+    width: 90%;
     margin: 0 auto;
+    /* Оптимізація рендерингу */
+    contain: layout style;
+    will-change: scroll-position;
+}
+
+/* Gallery Item Container */
+.gallery-item {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 15px;
+    overflow: hidden;
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+}
+
+/* Skeleton Loader */
+.skeleton-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--surface-color) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            var(--surface-color) 100%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .gallery-image {
     width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 15px;
+    height: 100%;
+    object-fit: contain;
     cursor: pointer;
     transition: all 0.4s ease;
-    border: 1px solid var(--glass-border);
-    background: var(--surface-color);
-    display: block !important;
-    /* Override the previous hiding */
+    display: block;
+    opacity: 0;
+    transform: scale(0.95) translateZ(0);
+    /* Оптимізація для GPU рендерингу */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* Уникаємо проблем з зникненням */
+    will-change: transform, opacity;
+    contain: layout style paint;
 }
 
-.gallery-image:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+.gallery-image.loaded {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+    animation: fadeInScale 0.5s ease-out;
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateZ(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateZ(0);
+    }
+}
+
+.gallery-item:hover .gallery-image.loaded {
+    transform: scale(1.05) translateZ(0);
+}
+
+.gallery-item:hover {
     border-color: var(--accent-secondary);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(188, 19, 254, 0.3);
 }
 
 /* Footer */
@@ -296,8 +413,27 @@ button#order-button i {
         font-size: 1.8rem;
     }
 
+    h2 {
+        font-size: 1.5rem;
+    }
+
     .gallery {
         grid-template-columns: 1fr;
         padding: 20px;
+        width: 95%;
+        gap: 20px;
+    }
+
+    .loading-text {
+        font-size: 1.2rem;
+    }
+
+    .loading-percentage {
+        font-size: 2rem;
+    }
+
+    button#order-button {
+        font-size: 1rem;
+        padding: 12px 30px;
     }
 }
